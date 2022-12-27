@@ -4,20 +4,22 @@ import com.sikepvp.mafia.Mafia;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class Cash {
 
     //Load Data into Map from cash.yml
-    private HashMap<UUID, Double> cashMap = new HashMap<UUID, Double>();
+    private static HashMap<UUID, Double> cashMap = new HashMap<UUID, Double>();
 
     Mafia plugin;
     public Cash(Mafia plugin) {
         this.plugin = plugin;
     }
 
-    public double getCash(UUID playerUUID) {
+    public static double getCash(UUID playerUUID) {
         if(hasCash(playerUUID)) {
             return cashMap.get(playerUUID);
         } else {
@@ -25,7 +27,7 @@ public class Cash {
         }
     }
 
-    public void setCash(UUID playerUUID, double cashAmount) {
+    public static void setCash(UUID playerUUID, double cashAmount) {
         if(hasCash(playerUUID)) {
             cashMap.put(playerUUID, roundTwoPlaces(cashAmount));
         } else {
@@ -33,7 +35,7 @@ public class Cash {
         }
     }
 
-    public void depositCash(UUID playerUUID, double depositAmount) {
+    public static void depositCash(UUID playerUUID, double depositAmount) {
         if(hasCash(playerUUID)) {
             cashMap.put(playerUUID, getCash(playerUUID) + roundTwoPlaces(depositAmount));
         } else {
@@ -41,7 +43,7 @@ public class Cash {
         }
     }
 
-    public void withdrawCash(UUID playerUUID, double withdrawAmount) {
+    public static void withdrawCash(UUID playerUUID, double withdrawAmount) {
         if(hasCash(playerUUID)) {
             cashMap.put(playerUUID, getCash(playerUUID) - roundTwoPlaces(withdrawAmount));
         } else {
@@ -49,7 +51,7 @@ public class Cash {
         }
     }
 
-    public void transferToPlayer(UUID fromPlayer, UUID toPlayer, double transferAmount) {
+    public static void transferToPlayer(UUID fromPlayer, UUID toPlayer, double transferAmount) {
         if(hasCash(fromPlayer) && hasCash(toPlayer)) {
             if(getCash(fromPlayer) >= roundTwoPlaces(transferAmount)) {
                 withdrawCash(fromPlayer, roundTwoPlaces(transferAmount));
@@ -60,7 +62,7 @@ public class Cash {
         }
     }
 
-    public boolean hasCash(UUID playerUUID) {
+    public static boolean hasCash(UUID playerUUID) {
         if(cashMap.containsKey(playerUUID)) {
             return true;
         } else {
@@ -68,7 +70,7 @@ public class Cash {
         }
     }
 
-    public void openBankAccount(UUID playerUUID) {
+    public static void openBankAccount(UUID playerUUID) {
         if(!hasCash(playerUUID)) {
             cashMap.put(playerUUID, 0.00);
         } else {
@@ -76,7 +78,7 @@ public class Cash {
         }
     }
 
-    public void closeBankAccount(UUID playerUUID) {
+    public static void closeBankAccount(UUID playerUUID) {
         if(hasCash(playerUUID)) {
             cashMap.remove(playerUUID);
         } else {
@@ -86,9 +88,26 @@ public class Cash {
 
     //Leaderstats & Checks
 
-    private double roundTwoPlaces(double amount) {
+    private static double roundTwoPlaces(double amount) {
         BigDecimal a = new BigDecimal(amount);
         return a.setScale(2, RoundingMode.HALF_EVEN).doubleValue();
+    }
+
+    public static String displayBalance(double amount) {
+        Map<String, Double> suffixes = new HashMap<>();
+        final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.00");
+        suffixes.put("K", 1000.00);
+        suffixes.put("M", 1000000.00);
+        suffixes.put("B", 1000000000.00);
+        suffixes.put("T", 1000000000000.00);
+
+        for(Map.Entry<String, Double> entry : suffixes.entrySet()) {
+            if(Math.abs(amount) >= entry.getValue()) {
+                amount = amount / entry.getValue();
+                return DECIMAL_FORMAT.format(amount) + entry.getKey();
+            }
+        }
+        return DECIMAL_FORMAT.format(amount);
     }
 
 }

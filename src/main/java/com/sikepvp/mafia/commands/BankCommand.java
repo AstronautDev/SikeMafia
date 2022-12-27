@@ -1,7 +1,9 @@
 package com.sikepvp.mafia.commands;
 
 import com.sikepvp.mafia.Mafia;
+import com.sikepvp.mafia.utility.API;
 import com.sikepvp.mafia.utility.Cash;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,6 +13,7 @@ import org.bukkit.entity.Player;
 public class BankCommand implements CommandExecutor {
 
     Mafia plugin;
+    StringUtils stringUtils;
     Cash cashUtil;
     public BankCommand(Mafia plugin) {
         this.plugin = plugin;
@@ -38,20 +41,28 @@ public class BankCommand implements CommandExecutor {
                         }
                     } else if(args[0].equalsIgnoreCase("Balance")) {
                         if(cashUtil.hasCash(p.getUniqueId())) {
-                            p.sendMessage(ChatColor.GREEN + "Balance: $" + cashUtil.getCash(p.getUniqueId()));
+                            p.sendMessage(ChatColor.GREEN + "Balance: $" + cashUtil.displayBalance(cashUtil.getCash(p.getUniqueId())));
                             return true;
                         } else {
                             p.sendMessage("u dont even have account bru");
                             return false;
                         }
-                    } else if(args[0].equalsIgnoreCase("Set")) {
+                    } else if(args[0].equalsIgnoreCase("Close")) {
                         if(cashUtil.hasCash(p.getUniqueId())) {
-                            cashUtil.depositCash(p.getUniqueId(), 566.72834);
-                            p.sendMessage("added heaps of dosh to ur account");
-                            return true;
+                            p.sendMessage(ChatColor.YELLOW + "Bank account now closed.");
+                            cashUtil.closeBankAccount(p.getUniqueId());
                         } else {
-                            p.sendMessage("no acc bro fr");
+                            p.sendMessage(ChatColor.RED + "You don't have a bank account.");
                             return false;
+                        }
+                    }
+                } else if(args.length == 2) {
+                    if(args[0].equalsIgnoreCase("Set")) {
+                        if(API.isNumber(args[1])) {
+                            cashUtil.setCash(p.getUniqueId(), Double.parseDouble(args[1]));
+                            p.sendMessage(ChatColor.YELLOW + "Your balance has been set to " + cashUtil.displayBalance(cashUtil.getCash(p.getUniqueId())));
+                        } else {
+                            p.sendMessage("Input was: " + args[1]);
                         }
                     }
                 }
