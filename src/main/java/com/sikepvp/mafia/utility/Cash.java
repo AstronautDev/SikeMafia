@@ -1,6 +1,7 @@
 package com.sikepvp.mafia.utility;
 
 import com.sikepvp.mafia.Mafia;
+import com.sikepvp.mafia.data.LoadData;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,9 +28,14 @@ public class Cash {
         }
     }
 
+    public static HashMap<UUID, Double> getCashMap() {
+        return cashMap;
+    }
+
     public static void setCash(UUID playerUUID, double cashAmount) {
         if(hasCash(playerUUID)) {
             cashMap.put(playerUUID, roundTwoPlaces(cashAmount));
+            LoadData.saveCashData(playerUUID, cashAmount);
         } else {
             return;
         }
@@ -38,6 +44,7 @@ public class Cash {
     public static void depositCash(UUID playerUUID, double depositAmount) {
         if(hasCash(playerUUID)) {
             cashMap.put(playerUUID, getCash(playerUUID) + roundTwoPlaces(depositAmount));
+            LoadData.saveCashData(playerUUID, getCash(playerUUID));
         } else {
             return;
         }
@@ -46,6 +53,7 @@ public class Cash {
     public static void withdrawCash(UUID playerUUID, double withdrawAmount) {
         if(hasCash(playerUUID)) {
             cashMap.put(playerUUID, getCash(playerUUID) - roundTwoPlaces(withdrawAmount));
+            LoadData.saveCashData(playerUUID, getCash(playerUUID));
         } else {
             return;
         }
@@ -56,6 +64,8 @@ public class Cash {
             if(getCash(fromPlayer) >= roundTwoPlaces(transferAmount)) {
                 withdrawCash(fromPlayer, roundTwoPlaces(transferAmount));
                 depositCash(toPlayer, roundTwoPlaces(transferAmount));
+                LoadData.saveCashData(toPlayer, getCash(toPlayer));
+                LoadData.saveCashData(fromPlayer, getCash(fromPlayer));
             }
         } else {
             return;
@@ -73,6 +83,7 @@ public class Cash {
     public static void openBankAccount(UUID playerUUID) {
         if(!hasCash(playerUUID)) {
             cashMap.put(playerUUID, 0.00);
+            LoadData.saveCashData(playerUUID, getCash(playerUUID));
         } else {
             return;
         }
@@ -81,6 +92,7 @@ public class Cash {
     public static void closeBankAccount(UUID playerUUID) {
         if(hasCash(playerUUID)) {
             cashMap.remove(playerUUID);
+            LoadData.removeCashData(playerUUID);
         } else {
             return;
         }
