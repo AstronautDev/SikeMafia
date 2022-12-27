@@ -1,0 +1,13 @@
+name: Mafia
+version: 1.0.0
+description: Mafia Core Plugin
+main: com.sikepvp.mafia.Mafia
+author: Sikeward
+softdepend:
+  - WorldEdit
+
+commands:
+  mansion:
+    description: Spawns a mansion
+  bank:
+    description: Bank Commands
